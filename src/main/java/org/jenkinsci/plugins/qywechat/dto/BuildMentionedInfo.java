@@ -1,7 +1,6 @@
 package org.jenkinsci.plugins.qywechat.dto;
 
 import org.jenkinsci.plugins.qywechat.model.NotificationConfig;
-import hudson.model.Result;
 import hudson.model.Run;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
@@ -27,6 +26,10 @@ public class BuildMentionedInfo {
      */
     private String mentionedMobile = "";
 
+    private String content = "";
+
+    private String topicName = "";
+
     public BuildMentionedInfo(Run<?, ?> run, NotificationConfig config){
         //通知ID
         if(config.mentionedId!=null){
@@ -35,6 +38,13 @@ public class BuildMentionedInfo {
         //通知手机号码
         if(config.mentionedMobile!=null) {
             mentionedMobile = config.mentionedMobile;
+        }
+
+        if (config.content != null) {
+            content = config.content;
+        }
+        if (config.topicName != null) {
+            topicName = config.topicName;
         }
     }
 
@@ -63,6 +73,7 @@ public class BuildMentionedInfo {
         Map text = new HashMap<String, Object>();
         text.put("mentioned_list", mentionedIdList);
         text.put("mentioned_mobile_list", mentionedMobileList);
+        text.put("content", "【" + topicName + "】\n" + content);
 
         Map data = new HashMap<String, Object>();
         data.put("msgtype", "text");

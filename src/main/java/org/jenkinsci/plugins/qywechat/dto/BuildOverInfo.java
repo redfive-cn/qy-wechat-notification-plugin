@@ -73,10 +73,11 @@ public class BuildOverInfo {
     public String toJSONString(){
         //组装内容
         StringBuilder content = new StringBuilder();
-        if(StringUtils.isNotEmpty(topicName)){
-            content.append(this.topicName);
-        }
+
         content.append("<font color=\"info\">【" + this.projectName + "】</font>构建" + getStatus() + "\n");
+        if(StringUtils.isNotEmpty(topicName)){
+            content.append(this.topicName + "\n");
+        }
         content.append(" >构建用时：<font color=\"comment\">" +  this.useTimeString + "</font>\n");
         if(StringUtils.isNotEmpty(this.consoleUrl)) {
             content.append(" >[查看控制台](" + this.consoleUrl + ")");

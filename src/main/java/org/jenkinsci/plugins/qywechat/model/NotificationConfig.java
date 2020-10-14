@@ -24,6 +24,22 @@ public class NotificationConfig {
      * 主题名称
      */
     public String topicName = "";
+    /**
+     * 通知内容
+     */
+    public String content = "";
+    /**
+     * 仅在失败通知
+     */
+    public boolean failNotify = false;
+    /**
+     * 开始时通知
+     */
+    public boolean startNotify = true;
+    /**
+     * 结束时通知
+     */
+    public boolean endNotify = true;
 
     /**
      * 使用代理
@@ -45,10 +61,4 @@ public class NotificationConfig {
      * 代理密码
      */
     public Secret proxyPassword = null;
-
-    /**
-     * 仅在失败通知
-     */
-    public boolean failNotify = false;
-
 }

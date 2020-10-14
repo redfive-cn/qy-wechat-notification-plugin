@@ -105,10 +105,11 @@ public class BuildBeginInfo {
 
         //组装内容
         StringBuilder content = new StringBuilder();
-        if(StringUtils.isNotEmpty(topicName)){
-            content.append(this.topicName);
-        }
+
         content.append("<font color=\"info\">【" + this.projectName + "】</font>开始构建\n");
+        if(StringUtils.isNotEmpty(topicName)){
+            content.append(this.topicName + "\n");
+        }
         content.append(" >构建参数：<font color=\"comment\">" + paramBuffer.toString() + "</font>\n");
         content.append(" >预计用时：<font color=\"comment\">" +  durationTimeStr + "</font>\n");
         if(StringUtils.isNotEmpty(this.consoleUrl)){

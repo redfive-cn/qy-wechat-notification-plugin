@@ -36,6 +36,14 @@ public class QyWechatNotification extends Publisher implements SimpleBuildStep {
 
     private String projectName;
 
+    private String content;
+
+    private String topicName;
+
+    private boolean startNotify;
+
+    private boolean endNotify;
+
     @Extension
     public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
 
@@ -62,14 +70,16 @@ public class QyWechatNotification extends Publisher implements SimpleBuildStep {
         if(StringUtils.isEmpty(config.webhookUrl)){
             return true;
         }
-        this.projectName = build.getProject().getFullDisplayName();
-        BuildBeginInfo buildInfo = new BuildBeginInfo(this.projectName, build, config);
+        if (config.startNotify) {
+            this.projectName = build.getProject().getFullDisplayName();
+            BuildBeginInfo buildInfo = new BuildBeginInfo(this.projectName, build, config);
 
-        String req = buildInfo.toJSONString();
-        listener.getLogger().println("推送通知" + req);
+            String req = buildInfo.toJSONString();
+            listener.getLogger().println("推送通知" + req);
 
-        //执行推送
-        push(listener.getLogger(), config.webhookUrl, req, config);
+            //执行推送
+            push(listener.getLogger(), config.webhookUrl, req, config);
+        }
         return true;
     }
 
@@ -101,9 +111,11 @@ public class QyWechatNotification extends Publisher implements SimpleBuildStep {
         String req = buildInfo.toJSONString();
         listener.getLogger().println("推送通知" + req);
 
-        //推送结束通知
-        push(listener.getLogger(), config.webhookUrl, req, config);
-        listener.getLogger().println("项目运行结果[" + result + "]");
+        if (config.endNotify) {
+            //推送结束通知
+            push(listener.getLogger(), config.webhookUrl, req, config);
+            listener.getLogger().println("项目运行结果[" + result + "]");
+        }
 
         //运行不成功
         if(result==null){
@@ -173,6 +185,14 @@ public class QyWechatNotification extends Publisher implements SimpleBuildStep {
         if(StringUtils.isNotEmpty(mentionedMobile)){
             config.mentionedMobile = mentionedMobile;
         }
+        if (StringUtils.isNotEmpty(content)) {
+            config.content = content;
+        }
+        if (StringUtils.isNotEmpty(topicName)) {
+            config.topicName = topicName;
+        }
+        config.startNotify = startNotify;
+        config.endNotify = endNotify;
         config.failNotify = failNotify;
         //使用环境变量
         if(config.webhookUrl.contains("$")){
@@ -226,6 +246,42 @@ public class QyWechatNotification extends Publisher implements SimpleBuildStep {
 
     public boolean isFailNotify() {
         return failNotify;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    @DataBoundSetter
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public String getTopicName() {
+        return topicName;
+    }
+
+    @DataBoundSetter
+    public void setTopicName(String topicName) {
+        this.topicName = topicName;
+    }
+
+    public boolean isStartNotify() {
+        return startNotify;
+    }
+
+    @DataBoundSetter
+    public void setStartNotify(boolean startNotify) {
+        this.startNotify = startNotify;
+    }
+
+    public boolean isEndNotify() {
+        return endNotify;
+    }
+
+    @DataBoundSetter
+    public void setEndNotify(boolean endNotify) {
+        this.endNotify = endNotify;
     }
 }
 

@@ -63,6 +63,14 @@ public class DescriptorImpl extends BuildStepDescriptor<Publisher> {
         config.mentionedMobile = mentionedMobile;
     }
 
+    public void setContent(String content) {
+        config.content = content;
+    }
+
+    public String getContent() {
+        return config.content;
+    }
+
     public boolean isUseProxy() {
         return config.useProxy;
     }
@@ -122,6 +130,10 @@ public class DescriptorImpl extends BuildStepDescriptor<Publisher> {
         unsaveConfig.mentionedId = config.mentionedId;
         unsaveConfig.mentionedMobile = config.mentionedMobile;
         unsaveConfig.topicName = config.topicName;
+        unsaveConfig.content = config.content;
+        unsaveConfig.endNotify = config.endNotify;
+        unsaveConfig.startNotify = config.startNotify;
+        unsaveConfig.failNotify = config.failNotify;
 
         unsaveConfig.useProxy = config.useProxy;
         unsaveConfig.proxyHost = config.proxyHost;
@@ -129,7 +141,6 @@ public class DescriptorImpl extends BuildStepDescriptor<Publisher> {
         unsaveConfig.proxyUsername = config.proxyUsername;
         unsaveConfig.proxyPassword = config.proxyPassword;
 
-        unsaveConfig.failNotify = config.failNotify;
         return unsaveConfig;
     }
 
@@ -175,6 +186,11 @@ public class DescriptorImpl extends BuildStepDescriptor<Publisher> {
         config.mentionedId = json.getString("mentionedId");
         config.mentionedMobile = json.getString("mentionedMobile");
         config.useProxy = json.get("useProxy")!=null;
+        config.content = json.getString("content");
+        config.startNotify = json.getBoolean("startNotify");
+        config.endNotify = json.getBoolean("endNotify");
+        config.failNotify = json.getBoolean("failNotify");
+
         if(config.useProxy && json.get("useProxy") instanceof JSONObject){
             JSONObject jsonObject = json.getJSONObject("useProxy");
             config.proxyHost = jsonObject.getString("proxyHost");
