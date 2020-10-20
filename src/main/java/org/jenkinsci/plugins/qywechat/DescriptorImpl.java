@@ -186,10 +186,6 @@ public class DescriptorImpl extends BuildStepDescriptor<Publisher> {
         config.mentionedId = json.getString("mentionedId");
         config.mentionedMobile = json.getString("mentionedMobile");
         config.useProxy = json.get("useProxy")!=null;
-        config.content = json.getString("content");
-        config.startNotify = json.getBoolean("startNotify");
-        config.endNotify = json.getBoolean("endNotify");
-        config.failNotify = json.getBoolean("failNotify");
 
         if(config.useProxy && json.get("useProxy") instanceof JSONObject){
             JSONObject jsonObject = json.getJSONObject("useProxy");
