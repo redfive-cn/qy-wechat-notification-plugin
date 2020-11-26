@@ -71,6 +71,22 @@ public class DescriptorImpl extends BuildStepDescriptor<Publisher> {
         return config.content;
     }
 
+    public String getSrcBranch() {
+        return config.srcBranch;
+    }
+
+    public void setSrcBranch(String srcBranch) {
+        config.srcBranch = srcBranch;
+    }
+
+    public String getDestBranch() {
+        return config.srcBranch;
+    }
+
+    public void setDestBranch(String destBranch) {
+        config.destBranch = destBranch;
+    }
+
     public boolean isUseProxy() {
         return config.useProxy;
     }
@@ -134,6 +150,8 @@ public class DescriptorImpl extends BuildStepDescriptor<Publisher> {
         unsaveConfig.endNotify = config.endNotify;
         unsaveConfig.startNotify = config.startNotify;
         unsaveConfig.failNotify = config.failNotify;
+        unsaveConfig.srcBranch = config.srcBranch;
+        unsaveConfig.destBranch = config.destBranch;
 
         unsaveConfig.useProxy = config.useProxy;
         unsaveConfig.proxyHost = config.proxyHost;

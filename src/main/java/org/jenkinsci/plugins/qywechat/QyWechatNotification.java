@@ -17,8 +17,7 @@ import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
 
 /**
  * 企业微信构建通知
@@ -43,6 +42,10 @@ public class QyWechatNotification extends Publisher implements SimpleBuildStep {
     private boolean startNotify;
 
     private boolean endNotify;
+
+    private String srcBranch;
+
+    private String destBranch;
 
     @Extension
     public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
@@ -84,7 +87,42 @@ public class QyWechatNotification extends Publisher implements SimpleBuildStep {
     }
 
     /**
+     * 执行简单命令 String cmd="ls"
+     */
+    public static String runScript(String cmd, File file) {
+        StringBuffer buf = new StringBuffer();
+        String rt = "-1";
+        try {
+            Process pos = Runtime.getRuntime().exec(cmd, new String[]{}, file);
+            pos.waitFor();
+            InputStreamReader ir = new InputStreamReader(pos.getInputStream());
+            LineNumberReader input = new LineNumberReader(ir);
+            String ln = "";
+            while ((ln = input.readLine()) != null) {
+                buf.append(ln + "\n");
+            }
+            input.close();
+            ir.close();
+            ir = new InputStreamReader(pos.getErrorStream());
+            input = new LineNumberReader(ir);
+            while ((ln = input.readLine()) != null) {
+                buf.append(ln + "\n");
+            }
+
+            rt = buf.toString();
+            input.close();
+            ir.close();
+        } catch (java.io.IOException e) {
+            rt = e.toString();
+        } catch (Exception e) {
+            rt = e.toString();
+        }
+        return rt;
+    }
+
+    /**
      * 构建结束
+     *
      * @param run
      * @param workspace
      * @param launcher
@@ -95,14 +133,14 @@ public class QyWechatNotification extends Publisher implements SimpleBuildStep {
     @Override
     public void perform(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
         NotificationConfig config = getConfig(run.getEnvironment(listener));
-        if(StringUtils.isEmpty(config.webhookUrl)){
+        if (StringUtils.isEmpty(config.webhookUrl)) {
             return;
         }
         Result result = run.getResult();
 
         //设置当前项目名称
-        if(run instanceof AbstractBuild){
-            this.projectName = run.getParent().getFullDisplayName() ;
+        if (run instanceof AbstractBuild) {
+            this.projectName = run.getParent().getFullDisplayName();
         }
 
         //构建结束通知
@@ -118,15 +156,22 @@ public class QyWechatNotification extends Publisher implements SimpleBuildStep {
         }
 
         //运行不成功
-        if(result==null){
+        if (result == null) {
             return;
         }
 
         //仅在失败的时候，才进行@
-        if(!result.equals(Result.SUCCESS) || !config.failNotify){
+        if (!result.equals(Result.SUCCESS) || !config.failNotify) {
             //没有填写UserId和手机号码
-            if(StringUtils.isEmpty(config.mentionedId) && StringUtils.isEmpty(config.mentionedMobile)){
+            if (StringUtils.isEmpty(config.mentionedId) && StringUtils.isEmpty(config.mentionedMobile)) {
                 return;
+            }
+
+            if (StringUtils.isNotEmpty(config.srcBranch) && StringUtils.isNotEmpty(config.destBranch)) {
+                String conflict = getConflict(workspace, listener, config);
+                if (StringUtils.isNotEmpty(conflict)) {
+                    config.content = config.content + "\r\n" + conflict;
+                }
             }
 
             //构建@通知
@@ -137,6 +182,30 @@ public class QyWechatNotification extends Publisher implements SimpleBuildStep {
             //执行推送
             push(listener.getLogger(), config.webhookUrl, req, config);
         }
+    }
+
+    private String getConflict(FilePath workspace, TaskListener listener, NotificationConfig config) {
+        String conflict = "";
+        try {
+            File file = new File(workspace.getRemote());
+            String srcBranch = config.srcBranch;
+            String destBranch = config.destBranch;
+            String srcCommit = runScript("/usr/bin/git rev-parse " + srcBranch + "^{commit}", file);
+            listener.getLogger().println("srcCommit:" + srcCommit);
+            String destCommit = runScript("/usr/bin/git rev-parse " + destBranch + "^{commit}", file);
+            listener.getLogger().println("destCommit:" + destCommit);
+            String checkOutResult = runScript("/usr/bin/git checkout -f " + destBranch, file);
+            listener.getLogger().println("checkOutResult:" + checkOutResult);
+            conflict = runScript("/usr/bin/git merge --ff " + srcCommit, file);
+            listener.getLogger().println("conflict:" + conflict);
+            int start = conflict.indexOf("Merge conflict in") + 17;
+            int end = conflict.indexOf("Automatic merge failed;");
+            conflict = conflict.substring(start, end);
+            runScript("/usr/bin/git checkout -f " + destCommit, file);
+        } catch (Exception e) {
+            listener.getLogger().println(e.getMessage());
+        }
+        return conflict;
     }
 
     /**
@@ -194,6 +263,8 @@ public class QyWechatNotification extends Publisher implements SimpleBuildStep {
         config.startNotify = startNotify;
         config.endNotify = endNotify;
         config.failNotify = failNotify;
+        config.srcBranch = srcBranch;
+        config.destBranch = destBranch;
         //使用环境变量
         if(config.webhookUrl.contains("$")){
             String val = NotificationUtil.replaceMultipleEnvValue(config.webhookUrl, envVars);
@@ -273,6 +344,24 @@ public class QyWechatNotification extends Publisher implements SimpleBuildStep {
     @DataBoundSetter
     public void setStartNotify(boolean startNotify) {
         this.startNotify = startNotify;
+    }
+
+    public String getSrcBranch() {
+        return srcBranch;
+    }
+
+    @DataBoundSetter
+    public void setSrcBranch(String srcBranch) {
+        this.srcBranch = srcBranch;
+    }
+
+    @DataBoundSetter
+    public void setDestBranch(String destBranch) {
+        this.destBranch = destBranch;
+    }
+
+    public String getDestBranch() {
+        return destBranch;
     }
 
     public boolean isEndNotify() {

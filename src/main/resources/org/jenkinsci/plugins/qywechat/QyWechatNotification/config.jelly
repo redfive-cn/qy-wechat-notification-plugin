@@ -25,4 +25,10 @@
     <f:entry title="失败时的通知内容" field="content" help="/plugin/qy-wechat-notification/help-globalConfig-content.html">
             <f:textbox />
         </f:entry>
+    <f:entry title="校验分支合并冲突,src,eg:origin/test1" field="srcBranch" help="/plugin/qy-wechat-notification/help-globalConfig-src-branch.html">
+            <f:textbox />
+        </f:entry>
+    <f:entry title="校验分支合并冲突,dest,eg:origin/test2" field="destBranch" help="/plugin/qy-wechat-notification/help-globalConfig-dest-branch.html">
+                <f:textbox />
+        </f:entry>
 </j:jelly>

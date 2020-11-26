@@ -40,6 +40,14 @@ public class NotificationConfig {
      * 结束时通知
      */
     public boolean endNotify = true;
+    /**
+     * 合并的源分支
+     */
+    public String srcBranch = "";
+    /**
+     * 合并的目标分支
+     */
+    public String destBranch = "";
 
     /**
      * 使用代理
